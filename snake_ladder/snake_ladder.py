@@ -8,7 +8,7 @@ NPCs = {
     81: 62,
     88: 67,
     98: 12,
-    
+
     # Ladders
     4: 75,
     5: 15,
@@ -42,11 +42,11 @@ class SnakeLadder:
     def step(self, action, render = False):
         self.turns += 1
         went_to = self.state + action + 1  # +1 because action is 0-indexed
-        
+
         if self.turns >= self.max_steps:
             if render: self.render("Max steps reached")
             return went_to if went_to < self.end else self.state, True, (-self.max_steps)/1
-        
+
         if self.NPCs.get(went_to):
             went_to = self.NPCs[went_to]
         if went_to > self.end:
