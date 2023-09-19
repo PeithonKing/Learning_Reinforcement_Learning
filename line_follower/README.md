@@ -1,0 +1,1 @@
+$$R = \frac{L}{2} + \frac{(V_r + V_l)L}{2(V_r - V_l)}$$

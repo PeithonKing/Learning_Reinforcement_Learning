@@ -21,6 +21,11 @@ NPCs = {
     70: 91,
 }
 
+def reward(turns, reward_origin = 10, max_steps = 15):
+    # if turns == 5:
+    #     return 100
+    return reward_origin - turns if turns < max_steps else -max_steps
+    
 
 class SnakeLadder:
 
@@ -45,7 +50,7 @@ class SnakeLadder:
 
         if self.turns >= self.max_steps:
             if render: self.render("Max steps reached")
-            return went_to if went_to < self.end else self.state, True, (-self.max_steps)/1
+            return went_to if went_to < self.end else self.state, True, reward(self.turns, self.reward_origin, self.max_steps)
 
         if self.NPCs.get(went_to):
             went_to = self.NPCs[went_to]
@@ -57,7 +62,7 @@ class SnakeLadder:
 
         if went_to == self.end:
             if render: self.render("Winner!")
-            return went_to, True, (self.reward_origin - self.turns)/1
+            return went_to, True, reward(self.turns, self.reward_origin, self.max_steps)
 
         if render: self.render()
         return went_to, self.turns >= self.max_steps, 0
