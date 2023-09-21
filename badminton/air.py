@@ -108,27 +108,30 @@ clock = pygame.time.Clock()
 pygame.display.update()
 
 
-s = np.array([0.0, 0.0, 0.0])
-v = np.array([100.0, 0.0, 100.0])
+# s = np.array([0.0, 0.0, 0.0])
+# v = np.array([100.0, 0.0, 100.0])
 
 dt = 0.05
 done = False
 FPS = 5/dt
 while not done:
+
+    # regular pygame stuff
     clock.tick(FPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
 
+    # reset the game when ball hits the ground
     if s[2]<=0:  # (s[2] = z) <= 0 means it hit the ground
         s = np.array([0.0, 0.0, 0.0])
         v = np.array([100.0, 100.0, 100.0])*1.3
         draw_court()
         print("again")
 
+    # update the position and velocity and draw the ball
     s, v = next_state(s, v, dt, c=0.2)
     # print(f"{s = }, {v = }")
-
     pygame.draw.circle(screen, RED, transform(s, 0), radius=1)  # top view
     pygame.draw.circle(screen, RED, transform(s, 1), radius=1)  # side view
     
