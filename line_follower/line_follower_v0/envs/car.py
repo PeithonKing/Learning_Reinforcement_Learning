@@ -1,9 +1,21 @@
 import numpy as np
 import pygame
 
-def to_pygame(point, height=500):
-    if len(point.shape)==2: return np.hstack([point[:, :1], height - point[:, 1:]])
-    return np.array([point[0], height - point[1]])
+def to_pygame(points, height=500):
+    """
+    Flip y-axis for Pygame screen coordinates.
+
+    Args:
+        points (array-like): Single point [x, y] or array of points [[x1, y1], ...].
+        height (int, optional): Screen or canvas height. Defaults to 500.
+
+    Returns:
+        np.ndarray: Points with y-axis flipped, same shape as input.
+    """
+    points = np.asarray(points)
+    points_flipped = points.copy()
+    points_flipped[..., 1] = height - points_flipped[..., 1]
+    return points_flipped
 
 def rotate_points(points, theta):
     theta -= np.pi/2
@@ -18,12 +30,12 @@ class Car:
     def __init__(
         self,
         sensor_grid = (4, 6),
-        dim = np.array((4, 6))*20,
         position=np.array([100, 100]),
         angle = np.pi/8
     ):
         self.sensor_grid = sensor_grid  # (rows, cols)
-        self.width, self.height = dim   # (width, height) in pixels
+        self.width  = sensor_grid[0]*20
+        self.height = sensor_grid[1]*20  # (width, height) in pixels
         self.pos0     = position  # (x, y) in pixels
         self.ang0     = angle     # angle in radians
         self.reset()
@@ -36,7 +48,7 @@ class Car:
                 [-self.width/2,  self.height/2]   # top left
             ]
         )
-        self.sensor_points = self._get_sensor_points_(*dim, *sensor_grid)
+        self.sensor_points = self._get_sensor_points_(self.width, self.height, *sensor_grid)
         
     def reset(self):
         self.angle = self.ang0
@@ -163,3 +175,39 @@ class Car:
         points = np.array([[[j-(rows-1)/2, (columns-1)/2-i] for j in range(rows)] for i in range(columns)])
 
         return points.reshape(-1, 2)*np.array([row_distance, col_distance])
+
+
+class Coins:
+    def __init__(self, coins, car, radius=30):
+        self.coins = coins
+        self.radius = radius
+        self.car = car
+        # print(*coins, sep="\n")
+        # print(coins[:, 0].min(), coins[:, 0].max())
+        # print(coins[:, 1].min(), coins[:, 1].max())
+        # quit()
+
+    def get_reward(self):
+        position = to_pygame(self.car.position)
+        # position = self.car.position
+        reward = 0
+        while reward<len(self.coins):
+            # the coins have to be collected in order
+            coin = self.coins[0]
+            if not np.linalg.norm(position - coin) < self.radius:
+                break
+            reward += 1
+            self.coins = np.roll(self.coins, -1, axis=0)
+        # if reward: print(reward)
+        return reward
+
+    def display(self, screen):
+        YELLOW = (255, 255, 0)
+        RED = (255, 0, 0)
+        GREEN = (0, 255, 0)
+        rad = 4
+        pygame.draw.circle(screen, YELLOW, self.coins[0], rad)
+        for coin in self.coins[1:]:
+            pygame.draw.circle(screen, RED, coin, rad)
+
+        pygame.draw.circle(screen, GREEN, to_pygame(self.car.position), self.radius, 1)
