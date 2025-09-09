@@ -3,13 +3,15 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["line_follower_v0"]
+packages = [
+  "line_follower_v0",
+  "line_follower_v1",
+]
 
 [project]
-name = "line_follower"
+name = "gym_envs"
 version = "0.0.1"
 dependencies = [
   "gymnasium",
-  "pygame>=2.1.3",
-  # "pre-commit",
+  "pygame>=2.1.3"
 ]

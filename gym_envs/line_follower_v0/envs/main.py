@@ -1,8 +1,9 @@
 import gymnasium as gym
 from gymnasium import spaces
-import pygame
+import pygame, os, random
 import numpy as np
 from matplotlib import image
+from importlib import resources
 
 from .car import Car, Coins, to_pygame
 
@@ -28,6 +29,12 @@ action_to_inputs = (
 
 class LineFollowerEnv(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 30}
+    USER_TRACK_PATHS = []
+
+    @classmethod
+    def add_track_folder(cls, folder):
+        """Add a folder to search for user tracks (prepend for priority)."""
+        cls.USER_TRACK_PATHS.insert(0, folder)
 
     def __init__(
         self, render_mode=None,
@@ -40,10 +47,6 @@ class LineFollowerEnv(gym.Env):
         self.track = track
         self.max_steps = max_steps
         self.hitbox = hitbox
-
-        self.track_image = (1-rgb2gray(image.imread(f"tracks/{track}.png"))).astype(bool)
-        self.waypoints = np.load(f"tracks/{track}_waypoints.npy")
-        self.pygame_track = pygame.image.load(f"tracks/{track}.png")
 
         self.observation_space = spaces.MultiBinary(
             (sensor_grid[0] * sensor_grid[1],)
@@ -64,6 +67,38 @@ class LineFollowerEnv(gym.Env):
         self.window = None
         self.clock = None
         self.curr_step = None
+        
+    def load_track(self, track: str):
+        png_path = npy_path = None
+
+        # First look in user folders
+        for folder in self.USER_TRACK_PATHS:
+            candidate_png = os.path.join(folder, f"{track}.png")
+            candidate_npy = os.path.join(folder, f"{track}_waypoints.npy")
+            if os.path.exists(candidate_png) and os.path.exists(candidate_npy):
+                png_path = candidate_png
+                npy_path = candidate_npy
+                break
+
+        # Then look in package tracks
+        if png_path is None or npy_path is None:
+            try:
+                with resources.path("line_follower_v0.tracks", f"{track}.png") as p:
+                    png_path = p
+                with resources.path("line_follower_v0.tracks", f"{track}_waypoints.npy") as p:
+                    npy_path = p
+            except FileNotFoundError:
+                raise FileNotFoundError(
+                    f"Track '{track}' not found in user folders or default package tracks."
+                )
+
+        self.track_image = (1 - rgb2gray(image.imread(png_path))).astype(bool)
+        self.waypoints = np.load(npy_path)[::10]
+        # reverse the waypoints with 50% probability
+        if random.random() < 0.5:
+            self.waypoints = self.waypoints[::-1]
+        self.pygame_track = pygame.image.load(png_path)
+
 
     def _get_obs(self):
     #     return {"agent": self._agent_location, "target": self._target_location}
@@ -79,6 +114,8 @@ class LineFollowerEnv(gym.Env):
     def reset(self, seed=None, options=None):
         # We need the following line to seed self.np_random
         super().reset(seed=seed)
+        
+        self.load_track(self.track)
         self.curr_step = 0
 
         random_waypoint_index = self.np_random.integers(0, len(self.waypoints)-1)

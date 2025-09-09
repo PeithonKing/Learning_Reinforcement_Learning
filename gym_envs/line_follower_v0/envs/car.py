@@ -206,8 +206,14 @@ class Coins:
         RED = (255, 0, 0)
         GREEN = (0, 255, 0)
         rad = 4
-        pygame.draw.circle(screen, YELLOW, self.coins[0], rad)
-        for coin in self.coins[1:]:
-            pygame.draw.circle(screen, RED, coin, rad)
+        for i, coin in enumerate(self.coins, start=1):
+            t = i / len(self.coins)   # 0 → 1 across coins
+            # interpolate between YELLOW and BLACK
+            r = int(YELLOW[0] * max(1 - 2*t, 0))
+            g = int(YELLOW[1] * max(1 - 2*t, 0))
+            b = int(YELLOW[2] * max(1 - 2*t, 0))
+            color = (r, g, b)
+            pygame.draw.circle(screen, color, coin, rad)
+        # pygame.draw.circle(screen, GREEN, self.coins[0], rad)
 
         pygame.draw.circle(screen, GREEN, to_pygame(self.car.position), self.radius, 1)

@@ -6,7 +6,7 @@ ENV_NAME = "line_follower_v0"
 
 env = gym.make(
     # f'gymnasium_env/{ENV_NAME}', render_mode="human",
-    f'gymnasium_env/{ENV_NAME}', render_mode=None,
+    f'my_gym_envs/{ENV_NAME}', render_mode=None,
     sensor_grid = (4, 6),
     track="path2",
     max_steps=500,

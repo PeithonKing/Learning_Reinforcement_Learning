@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg5"
+   inkscape:export-filename="rounded_square.svg"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       sodipodi:type="star"
+       style="fill:none;stroke:#000000;stroke-width:4.99999"
+       id="path1032"
+       inkscape:flatsided="true"
+       sodipodi:sides="4"
+       sodipodi:cx="99.478836"
+       sodipodi:cy="95.169289"
+       sodipodi:r1="36.567764"
+       sodipodi:r2="25.857315"
+       sodipodi:arg1="0.78539816"
+       sodipodi:arg2="1.5707963"
+       inkscape:rounded="0.2"
+       inkscape:randomized="0"
+       d="m 125.33615,121.0266 c -7.31355,7.31356 -44.401075,7.31356 -51.714628,0 -7.313553,-7.31355 -7.313553,-44.401072 0,-51.714625 7.313553,-7.313553 44.401078,-7.313553 51.714628,-10e-7 7.31355,7.313553 7.31355,44.401076 0,51.714626 z"
+       inkscape:transform-center-x="1.2532767e-06"
+       inkscape:transform-center-y="-1.1989831e-06" />
+  </g>
+</svg>

@@ -12,13 +12,13 @@ from evalualte import evaluate_model
 import line_follower_v0
 
 ENV_NAME = "line_follower_v0"
-EPISODES = 100
-GAMMA = 0.7
+EPISODES = 500
+GAMMA = 0.9
 LR = 1e-4
 BATCH_SIZE = 64
-MEMORY_SIZE = 1000
+MEMORY_SIZE = 5000
 EPS_START = 1.0
-EPS_END = 0.001
+EPS_END = 0.05
 TARGET_UPDATE = 10   # update target network every N episodes
 MODEL_PATH = "dqn_linefollower.pth"
 PLOT_PATH = "linefollower_rewards.png"
@@ -26,9 +26,12 @@ EPS_DECAY = (EPS_END / EPS_START) ** (1/(0.7*EPISODES))
 continue_training = True
 
 sensor_grid = (4, 6)
-track = "path2"
+# track = "oval"
+# track = "hexagon"
+track = "rounded_square"
+# track = "square"
 max_steps = 200
-hitbox = 20
+hitbox = 40
 
 # Use GPU
 device = torch.device("cpu")
@@ -67,7 +70,7 @@ class ReplayBuffer:
 # Environment setup
 env = gym.make(
     # f'gymnasium_env/{ENV_NAME}', render_mode="human",
-    f'gymnasium_env/{ENV_NAME}', render_mode=None,
+    f'my_gym_envs/{ENV_NAME}', render_mode=None,
     sensor_grid = sensor_grid,
     track = track,
     max_steps = max_steps,
@@ -220,7 +223,7 @@ for episode in range(start_episode, EPISODES):
         plt.legend()
         plt.title(f"({ENV_NAME}) Episode {episode+1}")
         plt.grid()
-        plt.ylim(0, 530)
+        plt.ylim(0, 800)
         plt.savefig(f"rewards_plot.png")
         plt.close()
 

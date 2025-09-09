@@ -1,6 +1,6 @@
 from gymnasium.envs.registration import register
 
 register(
-    id="gymnasium_env/line_follower_v0",
+    id="my_gym_envs/line_follower_v0",
     entry_point="line_follower_v0.envs:LineFollowerEnv",
 )
