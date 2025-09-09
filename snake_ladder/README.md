@@ -9,7 +9,7 @@ I got the idea from this video (highly recommended; starts at 59s):
 And here’s the board layout I followed:
 
 <p align="center">
-  <img src="layout.png" alt="The Layout of the snakes and ladders to be followed" width="200" />
+  <img src="layout.png" alt="The Layout of the snakes and ladders to be followed" width="400" />
 </p>
 
 ## Game
