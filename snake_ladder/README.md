@@ -2,9 +2,9 @@
 
 This was my first reinforcement learning simulation. I learned the most basic Q-table approach and used it to solve a fun twist on Snake and Ladder: the player has a “magical dice” and can precisely choose the outcome (1–6) each turn. The goal is to finish the game in the fewest possible moves.
 
-I got the idea from this video (highly recommended; the relevant part starts at 59s):
+I got the idea from this video (highly recommended; starts at 59s):
 
-<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/N3JL3z4e2Qs?si=2Lj5Vux31V_xC3IN&amp;start=59" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+> [Can you cheat death by solving this riddle? - Shravan S K](https://youtu.be/N3JL3z4e2Qs?t=59)
 
 And here’s the board layout I followed:
 
