@@ -203,8 +203,8 @@ class LineFollowerEnv(gym.Env):
         
         vals = sensor_vals if sensor_vals is not None else self._get_obs()
         
-        self.car.display(canvas, vals=vals)
         self.car_coins.display(canvas)
+        self.car.display(canvas, vals=vals)
 
         if self.render_mode == "human":
             # The following line copies our drawings from `canvas` to the visible window

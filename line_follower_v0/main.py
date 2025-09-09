@@ -23,8 +23,14 @@ TARGET_UPDATE = 10   # update target network every N episodes
 MODEL_PATH = "dqn_linefollower.pth"
 PLOT_PATH = "linefollower_rewards.png"
 EPS_DECAY = (EPS_END / EPS_START) ** (1/(0.7*EPISODES))
-continue_training = True
+SEED = 23
 
+# set the seed for both torch and numpy and everything
+torch.manual_seed(SEED)
+np.random.seed(SEED)
+random.seed(SEED)
+
+continue_training = True
 sensor_grid = (4, 6)
 # track = "oval"
 # track = "hexagon"
@@ -223,7 +229,7 @@ for episode in range(start_episode, EPISODES):
         plt.legend()
         plt.title(f"({ENV_NAME}) Episode {episode+1}")
         plt.grid()
-        plt.ylim(0, 800)
+        # plt.ylim(0, 800)
         plt.savefig(f"rewards_plot.png")
         plt.close()
 

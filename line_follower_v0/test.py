@@ -3,12 +3,13 @@ import line_follower_v0
 import pygame
 
 ENV_NAME = "line_follower_v0"
+enable_assist = True
 
 env = gym.make(
-    # f'gymnasium_env/{ENV_NAME}', render_mode="human",
-    f'my_gym_envs/{ENV_NAME}', render_mode=None,
+    f'my_gym_envs/{ENV_NAME}', render_mode="human",
+    # f'my_gym_envs/{ENV_NAME}', render_mode=None,
     sensor_grid = (4, 6),
-    track="path2",
+    track="oval",
     max_steps=500,
     # hitbox=20,
 )
@@ -29,12 +30,13 @@ while True:
 
     while not done:
         action = 1  # default: center
-            
-        vals = state[:4]
-        if vals[0]:
-            action = 0
-        elif vals[3]:
-            action = 2
+
+        if enable_assist:
+            vals = state[:4]
+            if vals[0]:
+                action = 0
+            elif vals[3]:
+                action = 2
 
         # Handle pygame events
         for event in pygame.event.get():
