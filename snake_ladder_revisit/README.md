@@ -2,7 +2,7 @@
 
 This is the second iteration of our “magical dice” Snake & Ladder experiment. In the first version (see `../snake_ladder`) the agent often settled for 6‑ or 7‑step solutions instead of consistently finding (and sticking to) the optimal 5‑step paths. The core issue: a linear reward made a 5‑step win only slightly better than a 6‑step win. Here we reshape the reward and change exploration so the shortest path is overwhelmingly preferred.
 
-We train against the new packaged environment ([`../gym_envs/snake_ladder`](../gym_envs/snake_ladder), README coming soon) which exposes a Gym interface (`my_gym_envs/snake_ladder_v0`).
+We train against the new packaged environment ([`../gym_envs/snake_ladder`](../gym_envs/snake_ladder), README) which exposes a Gym interface (`my_gym_envs/snake_ladder_v0`).
 
 ## Motivation in One Picture
 
@@ -30,20 +30,12 @@ We deliberately keep implementation simple: still plain tabular Q‑learning.
 ## Algorithm
 
 - Tabular Q‑learning.
-- Action selection: softmax over Q(s,·)/T. Temperature decays from `TEMP_START` to `TEMP_END` geometrically each episode.
+- Action selection: $\pi(a|s) = \frac{\exp(Q(s,a)/T)}{\sum_{a'} \exp(Q(s,a')/T)}$. Temperature decays from `TEMP_START` to `TEMP_END` geometrically each episode.
 - Update (per step):
-  - `target = r + GAMMA * max_a' Q[s', a']`
-  - `Q[s,a] -= LR * (Q[s,a] - target)`  (equivalent to classic α * TD‑error form).
-- Greedy evaluation (temperature ≈ 0) every 1000 episodes.
+  - $\text{target} = \text{reward} + \gamma \cdot \max_{a'} Q(s', a')$
+  - $Q(s,a) \leftarrow Q(s,a) + \alpha \cdot (\text{target} - Q(s,a))$
+- While evaluation we go greedy mode with temperature $\approx 0$ every 1000 episodes.
 
-Core hyperparameters (see [`main.py`](main.py)):
-
-- Episodes: 50_000 recommended (you may lower for quick tests)
-- GAMMA: 0.99
-- LR: 0.01
-- Temperature: 1.0 → 0.01 (geometric decay)
-- Checkpoint interval: 1000 episodes
-- Smoothing window (plot): 2000 episodes
 
 ## Running
 
@@ -61,11 +53,9 @@ Training / evaluation curve:
   <img src="reward_graph.png" alt="Reward graph" width="640" />
 </p>
 
-Q‑table evolution (temperature & episode in frame titles):
+Q‑table evolution:
 
-<p align="center">
-  <img src="q_table_evolution.gif" alt="Q-table evolution" width="640" />
-</p>
+![q_table_evolution.gif](q_table_evolution.gif)
 
 ## Files
 
@@ -73,4 +63,3 @@ Q‑table evolution (temperature & episode in frame titles):
 - [`utils.py`](utils.py) — QTable wrapper and evaluation helper.
 - [`reward_graph.png`](reward_graph.png) — generated performance plot.
 - [`q_table_evolution.gif`](q_table_evolution.gif) — animated Q‑table progression (generated at end of training).
-
