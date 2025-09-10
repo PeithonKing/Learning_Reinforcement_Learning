@@ -126,7 +126,6 @@ if continue_training and os.path.exists(MODEL_PATH):
 
 memory = ReplayBuffer(MEMORY_SIZE)
 
-deterministic_actor = False
 
 # --- Training Loop ---
 progress_bar = tqdm(total=EPISODES, initial=start_episode, dynamic_ncols=True)
@@ -136,22 +135,10 @@ for episode in range(start_episode, EPISODES):
     done = truncated = False
 
     while not done and not truncated:
-        
-        if deterministic_actor:
-            left_sensor = state[0]
-            right_sensor = state[3]
-            # print(left_sensor, right_sensor)
-            action = np.array([1.0, 1.0])
-            if left_sensor:
-                action[0] = 0.0
-            if right_sensor:
-                action[1] = 0.0
-
-        else:
-            with torch.no_grad():
-                action = actor(torch.FloatTensor(state).to(device)).cpu().numpy()
-                noise = np.random.normal(0, max_action * NOISE_STDDEV, size=action_dim)
-                action = (action + noise).clip(env.action_space.low, env.action_space.high)
+        with torch.no_grad():
+            action = actor(torch.FloatTensor(state).to(device)).cpu().numpy()
+            noise = np.random.normal(0, max_action * NOISE_STDDEV, size=action_dim)
+            action = (action + noise).clip(env.action_space.low, env.action_space.high)
 
         next_state, reward, done, truncated, _ = env.step(action)
         memory.push(state, action, reward, next_state, done or truncated)

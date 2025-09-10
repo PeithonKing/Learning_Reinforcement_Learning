@@ -6,6 +6,7 @@ build-backend = "hatchling.build"
 packages = [
   "line_follower_v0",
   "line_follower_v1",
+  "snake_ladder",
 ]
 
 [project]

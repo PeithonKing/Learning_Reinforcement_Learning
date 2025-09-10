@@ -7,6 +7,7 @@ This repository documents my journey in learning reinforcement learning, featuri
 Here is a description (in chronological order) which folder (project) does what along with a short description. However a detailed description is provided in each folder.
 
 - **[snake_ladder/](snake_ladder/)**: Using Q table. Very basic, numpy implementation. The game is, if the player is given a magical power of precisely controlling the outcome of the dice, what is the minimum number of steps the player can complete the game in.
+- **[snake_ladder_revisit/](snake_ladder_revisit/)**: This project revisits the snake ladder problem. This time adding a custom Gymnasium environment for the snake ladder game. The main target was to design the reward in a better way for better learning. While sticking to the same tabular Q-learning algorithm, we changed the exploration strategy from epsilon-greedy to temperature-based softmax (boltzman) just for fun.
 - **[mountain_car/](mountain_car/)**: Learned Deep Q learning. Used a basic neural network (using pytorch) to train the [mountain car environment](https://gymnasium.farama.org/environments/classic_control/mountain_car/) from [gymnasium](https://gymnasium.farama.org/).
 - **[gym_envs/](gym_envs/)**: Collection of custom Gymnasium environments. All custom gym envs we build go here, and we would use these to train RL.
 - **[line_follower_v0/](line_follower_v0/)**: Using the custom env at [gym_envs/line_follower_v0](gym_envs/line_follower_v0). We train another DQN model. This is the second DQN model we trained.
