@@ -8,7 +8,7 @@ from collections import deque
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-from evalualte import evaluate_model
+from evaluate import evaluate_model
 import line_follower_v0
 
 ENV_NAME = "line_follower_v0"
