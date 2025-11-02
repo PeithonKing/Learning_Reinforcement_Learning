@@ -38,7 +38,9 @@ Here is a description (in chronological order) which folder (project) does what 
       If I want to commit to this repository directly and make changes to the submodules, I might need to set the remote URL of the submodules to use SSH instead of HTTPS. To do this, run the following commands:
 
       ```bash
+      cd gym_envs
       git remote set-url --push origin git@github.com:PeithonKing/gym_envs.git
+      cd ..
       ```
    </details>
 
