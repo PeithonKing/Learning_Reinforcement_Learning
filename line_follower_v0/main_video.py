@@ -13,12 +13,12 @@ from models import DQN
 import line_follower_v0
 
 ENV_NAME = "line_follower_v0"
-EPISODES = 1000
+EPISODES = 800
 GAMMA = 0.9
 LR = 2e-5
 BATCH_SIZE = 256
 MEMORY_SIZE = 20_000
-EPS_START = 1.0
+EPS_START = 2.5
 EPS_END = 0.05
 TARGET_UPDATE = 10   # update target network every N episodes
 MODEL_PATH = "dqn_linefollower.pth"
@@ -110,7 +110,7 @@ if continue_training and os.path.exists(MODEL_PATH):
     test_rewards = loaded_model["test_rewards"]
     test_episodes = loaded_model["test_episodes"]
 
-epsilon = max(EPS_START * EPS_DECAY ** start_episode, EPS_END)
+epsilon = max(EPS_END, EPS_START * EPS_DECAY ** start_episode)
 target_net.eval()
 # print(f"Epsilon decay rate: {EPS_DECAY:.4f}")
 
@@ -123,6 +123,7 @@ progress_bar = tqdm(
     desc=f"Avg Reward (last 10): {stale_reward}, Epsilon: {epsilon:.2f}",
     dynamic_ncols=True
 )
+started_training = False
 for episode in range(start_episode, EPISODES):
     state, _ = env.reset()
     total_reward = 0
@@ -147,7 +148,8 @@ for episode in range(start_episode, EPISODES):
 
         # Train step if enough samples
         # if len(memory) >= BATCH_SIZE:
-        if len(memory) >= (MEMORY_SIZE//2):
+        if len(memory) >= 50*200:
+            started_training = True
             states, actions, rewards, next_states, dones = memory.sample(BATCH_SIZE)
 
             states = torch.FloatTensor(states).to(device)
@@ -183,7 +185,7 @@ for episode in range(start_episode, EPISODES):
             hitbox=hitbox,
             x_spacing=x_spacing,
             y_spacing=y_spacing,
-            episodes=10,
+            episodes=100,
             verbose=False
         )
         test_rewards.append(test_reward_mean)
@@ -215,33 +217,37 @@ for episode in range(start_episode, EPISODES):
         plt.grid()
         # plt.ylim(0, 800)
         plt.savefig(f"rewards_plot.png")
-        plt.close()
         
-        
-        
+        save_content = {
+            "state_dict": policy_net.state_dict(),
+            "hidden_dim": hidden_dim,
+            "hidden_layers": hidden_layers,
+            "optimizer_state_dict": optimizer.state_dict(),
+            "episode": episode,
+            "epsilon": epsilon,
+            "rewards_per_episode": rewards_per_episode,
+            "reward": np.mean(rewards_per_episode[-10:]) if len(rewards_per_episode) >= 10 else None,
+            "test_rewards": test_rewards,
+            "test_episodes": test_episodes,
+            "sensor_grid": sensor_grid,
+            "action_dim": action_dim,
+            "track": track,
+            "max_steps": max_steps,
+            "hitbox": hitbox,
+            "x_spacing": x_spacing,
+            "y_spacing": y_spacing,
+        }
+
         # save checkpoint
-        torch.save(
-            {
-                "state_dict": policy_net.state_dict(),
-                "hidden_dim": hidden_dim,
-                "hidden_layers": hidden_layers,
-                "optimizer_state_dict": optimizer.state_dict(),
-                "episode": episode,
-                "epsilon": epsilon,
-                "rewards_per_episode": rewards_per_episode,
-                "reward": np.mean(rewards_per_episode[-10:]) if len(rewards_per_episode) >= 10 else None,
-                "test_rewards": test_rewards,
-                "test_episodes": test_episodes,
-                "sensor_grid": sensor_grid,
-                "action_dim": action_dim,
-                "track": track,
-                "max_steps": max_steps,
-                "hitbox": hitbox,
-                "x_spacing": x_spacing,
-                "y_spacing": y_spacing,
-            },
-            MODEL_PATH
-        )
+        torch.save(save_content, MODEL_PATH)
+        
+        # extra saves
+        if started_training:
+            torch.save(save_content, f"for_video/saved_models/{episode+1:04d}.pth")
+            plt.savefig(f"for_video/graphs/{episode+1:04d}.png", dpi=150)
+        
+        plt.close()
+        # exit(0)
 
     # Update tqdm description every 100 episodes
     if (episode) % 10 == 0:

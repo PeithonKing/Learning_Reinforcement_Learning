@@ -14,12 +14,12 @@ import line_follower_v1
 
 # --- Hyperparameters ---
 ENV_NAME = "line_follower_v1"
-EPISODES = 2000
+EPISODES = 1000
 GAMMA = 0.99
-LR_ACTOR = 2e-5
-LR_CRITIC = 5e-4
-BATCH_SIZE = 256
-MEMORY_SIZE = 20000
+LR_ACTOR = 1e-4
+LR_CRITIC = 1e-3
+BATCH_SIZE = 64
+MEMORY_SIZE = 5000
 TAU = 1e-3
 NOISE_STDDEV = 0.1
 TARGET_UPDATE = 10
@@ -37,16 +37,17 @@ continue_training = True
 sensor_grid = (4, 3)
 # track = "oval"
 # track = "hexagon"
-# track = "rounded_square_orig"
-track = "square_orig"
+track = "rounded_square_orig"
+# track = "square_orig"
 # track = "rounded_square"
 # track = "square"
 max_steps = 200
 hitbox = 40
+history_length = 5
 
 # Allow experimenting with different action/state encoder sizes
-hidden_dim = 64
-hidden_layers = 2
+hidden_dim = 32
+hidden_layers = 1
 
 # Optionally allow spacing parameters for parity with v0 (env can ignore if unsupported)
 x_spacing = 40
@@ -59,8 +60,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class ReplayBuffer:
     def __init__(self, capacity):
         self.buffer = deque(maxlen=capacity)
-    def push(self, state, action, reward, next_state, done):
-        self.buffer.append((state, action, reward, next_state, done))
+    def push(self, states, action, reward, next_state, done):
+        self.buffer.append((states, action, reward, next_state, done))
     def sample(self, batch_size):
         return random.sample(self.buffer, batch_size)
     def __len__(self):
@@ -81,12 +82,12 @@ state_dim = env.observation_space.shape[0]
 action_dim = env.action_space.shape[0]
 max_action = float(env.action_space.high[0])
 
-actor = Actor(state_dim, action_dim, max_action, hidden_dim, hidden_layers).to(device)
-actor_target = Actor(state_dim, action_dim, max_action, hidden_dim, hidden_layers).to(device)
+actor = Actor(state_dim*history_length, action_dim, max_action, hidden_dim, hidden_layers).to(device)
+actor_target = Actor(state_dim*history_length, action_dim, max_action, hidden_dim, hidden_layers).to(device)
 actor_optimizer = optim.Adam(actor.parameters(), lr=LR_ACTOR)
 
-critic = Critic(state_dim, action_dim, hidden_dim, hidden_layers).to(device)
-critic_target = Critic(state_dim, action_dim, hidden_dim, hidden_layers).to(device)
+critic = Critic(state_dim*history_length, action_dim, hidden_dim, hidden_layers).to(device)
+critic_target = Critic(state_dim*history_length, action_dim, hidden_dim, hidden_layers).to(device)
 critic_optimizer = optim.Adam(critic.parameters(), lr=LR_CRITIC)
 
 start_episode = 0
@@ -105,10 +106,16 @@ if continue_training and os.path.exists(MODEL_PATH):
     critic_target.load_state_dict(checkpoint["critic_state_dict"])
     actor_optimizer.load_state_dict(checkpoint["actor_optimizer_state_dict"])
     critic_optimizer.load_state_dict(checkpoint["critic_optimizer_state_dict"])
+    
     start_episode = checkpoint["episode"] + 1
     rewards_per_episode = checkpoint["rewards_per_episode"]
     test_rewards = checkpoint["test_rewards"]
     test_episodes = checkpoint["test_episodes"]
+    
+    assert checkpoint["history_length"] == history_length, "History length mismatch"
+    assert checkpoint["sensor_grid"] == sensor_grid, "Sensor grid mismatch"
+    assert checkpoint["hidden_dim"] == hidden_dim, "Hidden dim mismatch"
+    assert checkpoint["hidden_layers"] == hidden_layers, "Hidden layers mismatch"
 
 memory = ReplayBuffer(MEMORY_SIZE)
 
@@ -120,15 +127,22 @@ for episode in range(start_episode, EPISODES):
     total_reward = 0
     done = truncated = False
 
+    history = deque(maxlen=history_length)
+    for _ in range(history_length - 1):
+        history.append(np.zeros(state_dim))
+    history.append(state)
     while not done and not truncated:
         with torch.no_grad():
-            action = actor(torch.FloatTensor(state).to(device)).cpu().numpy()
+            mem_state = np.array(history).flatten()
+            action = actor(torch.FloatTensor(mem_state).to(device)).cpu().numpy()
             noise = np.random.normal(0, max_action * NOISE_STDDEV, size=action_dim)
             action = (action + noise).clip(env.action_space.low, env.action_space.high)
 
         next_state, reward, done, truncated, _ = env.step(action)
-        memory.push(state, action, reward, next_state, done or truncated)
-        state = next_state
+        history.append(next_state)
+        next_mem_state = np.array(history).flatten()
+        memory.push(mem_state, action, reward, next_mem_state, done or truncated)
+        # state = next_state
         total_reward += reward
 
         if len(memory) > BATCH_SIZE:
@@ -176,6 +190,7 @@ for episode in range(start_episode, EPISODES):
             ENV_NAME,
             None,
             sensor_grid,
+            history_length,
             track,
             max_steps,
             hitbox,
@@ -187,7 +202,7 @@ for episode in range(start_episode, EPISODES):
         test_episodes.append(episode)
 
         # Smoothed training rewards (window=100 padded) like v0 script
-        window = 100
+        window = 10
         if len(rewards_per_episode) >= window:
             left_pad = window // 2
             right_pad = window - 1 - left_pad
@@ -236,6 +251,7 @@ for episode in range(start_episode, EPISODES):
                 "hidden_layers": hidden_layers,
                 "x_spacing": x_spacing,
                 "y_spacing": y_spacing,
+                "history_length": history_length,
             }, MODEL_PATH)
             print(f"Saved new best model with test reward {test_reward:.2f} at episode {episode+1}")
 

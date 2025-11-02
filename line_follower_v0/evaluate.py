@@ -1,27 +1,31 @@
 import gymnasium as gym
 import torch
 import torch.nn as nn
+from models import DQN
+import numpy as np
 
-class DQN(nn.Module):
-    def __init__(self, state_dim, action_dim):
-        super(DQN, self).__init__()
-        self.net = nn.Sequential(
-            nn.Linear(state_dim, 32),
-            nn.ReLU(),
-            nn.Linear(32, action_dim)
-        )
-
-    def forward(self, x):
-        return self.net(x)
-
-def evaluate_model(model, env_name, render_mode, sensor_grid, track, max_steps, hitbox, episodes, verbose=False):
+def evaluate_model(
+    model, env_name, render_mode,
+    sensor_grid,
+    track,
+    max_steps,
+    hitbox,
+    x_spacing,
+    y_spacing,
+    episodes,
+    verbose=False
+):
     env = gym.make(
         f'my_gym_envs/{env_name}', render_mode=render_mode,
         sensor_grid=sensor_grid,
         track=track,
         max_steps=max_steps,
         hitbox=hitbox,
+        x_spacing=x_spacing,
+        y_spacing=y_spacing,
+        verbose=verbose
     )
+    # env.metadata["render_fps"] = 5
     
     total_rewards = []
     for ep in range(episodes):
@@ -44,7 +48,7 @@ def evaluate_model(model, env_name, render_mode, sensor_grid, track, max_steps, 
         if verbose: print(f"Episode {ep+1}: Total Reward = {total_reward}")
 
     env.close()
-    return sum(total_rewards) / len(total_rewards)
+    return np.mean(total_rewards)
 
 if __name__ == "__main__":
     import line_follower_v0
@@ -61,9 +65,14 @@ if __name__ == "__main__":
     max_steps = loaded_model["max_steps"]
     # max_steps = 500
     track = loaded_model["track"]
-    # track = "square"
+    # track = "rounded_square"
 
-    policy_net = DQN(sensor_grid[0]*sensor_grid[1], loaded_model["action_dim"])
+    policy_net = DQN(
+        sensor_grid[0]*sensor_grid[1],
+        loaded_model["action_dim"],
+        loaded_model["hidden_dim"],
+        loaded_model["hidden_layers"]
+    )
     policy_net.load_state_dict(loaded_model["state_dict"])
     policy_net.eval()
 
@@ -76,6 +85,8 @@ if __name__ == "__main__":
             track,
             max_steps,
             hitbox,
+            x_spacing=loaded_model["x_spacing"],
+            y_spacing=loaded_model["y_spacing"],
             episodes=1,
             verbose=True
         )
