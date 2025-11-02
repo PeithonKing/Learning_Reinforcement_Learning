@@ -26,14 +26,30 @@ Here is a description (in chronological order) which folder (project) does what 
 
 ## Installation
 
-1. **Create a virtual environment** (optional but highly recommended):
+1. **Clone the repo (including all submodules)**:
+
+   ```bash
+   git clone --recurse-submodules https://github.com/PeithonKing/Learning_Reinforcement_Learning.git
+   cd Learning_Reinforcement_Learning
+   ```
+
+   <details>
+      <summary>Extra steps for developers</summary>
+      If I want to commit to this repository directly and make changes to the submodules, I might need to set the remote URL of the submodules to use SSH instead of HTTPS. To do this, run the following commands:
+
+      ```bash
+      git remote set-url --push origin git@github.com:PeithonKing/gym_envs.git
+      ```
+   </details>
+
+2. **Create a virtual environment** (optional but highly recommended):
 
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
-2. **Install PyTorch**:
+3. **Install PyTorch**:
    - GPU is mostly not needed, and all code works fast enough on CPU. You can install PyTorch for CPU like this:
 
      ```bash
@@ -42,16 +58,16 @@ Here is a description (in chronological order) which folder (project) does what 
 
    - however if you absolutely want to use GPU and have a cuda supported NVIDIA Card, follow the instructions at [https://pytorch.org/get-started/locally/](https://pytorch.org/get-started/locally/).
 
-3. **Install requirements**:
+4. **Install requirements**:
 
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Install the custom environments**:
+5. **Install the custom environments**:
 
    ```bash
-   cd gym_envs
+   cd gym_envs  # hope you had cloned with submodules properly as mentioned
    pip install -e .  # install the custom gym environments
-   cd ..  # go back to the root directory
+   cd ..  # go back to the root directory 😅
    ```
